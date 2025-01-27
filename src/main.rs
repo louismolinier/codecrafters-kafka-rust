@@ -1,4 +1,5 @@
 #![allow(unused_imports)]
+use std::io::Read;
 use std::io::Write;
 use std::net::TcpListener;
 
@@ -9,8 +10,20 @@ fn main() {
         match stream {
             Ok(mut _stream) => {
                 println!("accepted new connection");
-                let buf: [u8; 8] = [0, 0, 0, 0, 0, 0, 0, 7];
-                _stream.write(&buf).unwrap();
+
+                let mut message_size: [u8; 4] = [0, 0, 0, 0];
+                _stream.read(&mut message_size).unwrap();
+
+                let mut request_api_key: [u8; 2] = [0, 0];
+                _stream.read(&mut request_api_key).unwrap();
+
+                let mut request_api_version: [u8; 2] = [0, 0];
+                _stream.read(&mut request_api_version).unwrap();
+
+                let mut correlation_id: [u8; 4] = [0, 0, 0, 0];
+                _stream.read(&mut correlation_id).unwrap();
+
+                _stream.write(&correlation_id).unwrap();
             }
             Err(e) => {
                 println!("error: {}", e);
