@@ -8,23 +8,19 @@ fn main() {
 
     for stream in listener.incoming() {
         match stream {
-            Ok(mut _stream) => {
+            Ok(mut stream) => {
                 println!("accepted new connection");
 
                 let mut message_size: [u8; 4] = [0, 0, 0, 0];
-                _stream.read(&mut message_size).unwrap();
+                stream.read(&mut message_size).unwrap();
+                let size = i32::from_be_bytes(message_size) as usize;
+                let mut message = vec![0; size];
+                stream.read_exact(&mut message).unwrap();
 
-                let mut request_api_key: [u8; 2] = [0, 0];
-                _stream.read(&mut request_api_key).unwrap();
-
-                let mut request_api_version: [u8; 2] = [0, 0];
-                _stream.read(&mut request_api_version).unwrap();
-
-                let mut correlation_id: [u8; 4] = [0, 0, 0, 0];
-                _stream.read(&mut correlation_id).unwrap();
-
-                _stream.write(&message_size).unwrap();
-                _stream.write(&correlation_id).unwrap();
+                let mut response = Vec::new();
+                response.extend(&message_size);
+                response.extend(&message[4..8]);
+                stream.write_all(&response).unwrap();
             }
             Err(e) => {
                 println!("error: {}", e);
