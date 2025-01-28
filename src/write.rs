@@ -16,13 +16,15 @@ pub fn write(message: Vec<u8>, mut stream: &TcpStream) {
     } else {
         data.extend((0 as u16).to_be_bytes());
     }
-    data.extend((2 as u8).to_be_bytes());
-    data.extend((18 as u16).to_be_bytes());
-    data.extend((0 as u16).to_be_bytes());
-    data.extend((4 as u16).to_be_bytes());
-    data.extend((0 as u8).to_be_bytes());
-    data.extend((420 as u32).to_be_bytes());
-    data.extend((0 as u8).to_be_bytes());
+    if i16::from_be_bytes([request_api_key[0], request_api_key[1]]) == 18 {
+        data.extend((2 as u8).to_be_bytes());
+        data.extend((18 as u16).to_be_bytes());
+        data.extend((0 as u16).to_be_bytes());
+        data.extend((4 as u16).to_be_bytes());
+        data.extend((0 as u8).to_be_bytes());
+        data.extend((420 as u32).to_be_bytes());
+        data.extend((0 as u8).to_be_bytes());
+    }
     let size = data.len() as u32;
     let message_size: [u8; 4] = size.to_be_bytes();
     let mut reponse = Vec::from(message_size);
